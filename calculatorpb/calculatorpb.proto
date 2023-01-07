@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "calculatorpb/calculatorpb";
+
+service CalculatorService {
+
+    rpc Sum(SumRequest) returns (SumResponse) {}
+    rpc PrimeNumberDecompition(PrimeNumberDecompitionRequest) returns (stream PrimeNumberDecompitionResponse) {}
+    rpc ComputeAvarage(stream ComputeAvarageRequest) returns (ComputeAvarageResponse) {}
+    rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {}
+
+}
+
+message SumRequest {
+    int32 first_number = 1;
+    int32 second_number = 2;
+}
+
+message SumResponse {
+    int32 sum_result = 1;
+}
+
+message PrimeNumberDecompitionRequest {
+    int64 number = 1;
+}
+
+message PrimeNumberDecompitionResponse {
+    int64 prime_factor = 1;
+}
+
+message ComputeAvarageRequest {
+    int64 number = 1;
+}
+
+message ComputeAvarageResponse {
+    double avarage = 1;
+}
+
+message FindMaximumRequest {
+    int32 number = 1;
+}
+
+message FindMaximumResponse {
+    int32 maximum = 1;
+}
