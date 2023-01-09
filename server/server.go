@@ -16,45 +16,46 @@ type server struct {
 	*pb.UnimplementedCalculatorServiceServer
 }
 
-func (s *server) Sum(ctx context.Context, req *pb.SumRequest) (*pb.SumResponse, error) {
+func (s *server) SquareRoot(ctx context.Context, req *pb.SquareRequest) (*pb.SquareResponse, error) {
 
-	fmt.Println("Recieved: ", req)
-
-	sum := req.FirstNumber + req.SecondNumber
-
-	return &pb.SumResponse{
-		SumResult: sum,
+	var sr float32 = float32(req.Number) / 2
+	var temp float32
+	for {
+		temp = sr
+		sr = (temp + (float32(req.Number) / temp)) / 2
+		if (temp - sr) == 0 {
+			break
+		}
+	}
+	return &pb.SquareResponse{
+		SqrtResult: sr,
 	}, nil
 }
 
-func (s *server) PrimeNumberDecompition(req *pb.PrimeNumberDecompitionRequest, stream pb.CalculatorService_PrimeNumberDecompitionServer) error {
+func (s *server) PerfectNumber(req *pb.PerfectNumberRequest, stream pb.CalculatorService_PerfectNumberServer) error {
 
 	fmt.Println("Req:", req)
 
 	number := req.GetNumber()
-	divisor := int64(2)
-
-	for number > 1 {
-
-		if number%divisor == 0 {
-
-			stream.Send(&pb.PrimeNumberDecompitionResponse{
-				PrimeFactor: divisor,
+	nums := int64(1)
+	for nums <= number {
+		if findPerfectNumber(nums) {
+			stream.Send(&pb.PerfectNumberResponse{
+				PerfectNumber: nums,
 			})
-
-			number = number / divisor
+			nums++
 		} else {
-			divisor++
+			nums++
 		}
 	}
 
 	return nil
 }
 
-func (s *server) ComputeAvarage(stream pb.CalculatorService_ComputeAvarageServer) error {
+func (s *server) TotalNumber(stream pb.CalculatorService_TotalNumberServer) error {
 
 	var (
-		sum, count int64
+		total float64
 	)
 
 	for {
@@ -63,13 +64,12 @@ func (s *server) ComputeAvarage(stream pb.CalculatorService_ComputeAvarageServer
 
 		if err == io.EOF {
 
-			avarage := float64(sum) / float64(count)
-			err = stream.SendAndClose(&pb.ComputeAvarageResponse{
-				Avarage: avarage,
+			err = stream.SendAndClose(&pb.TotalNumberResponse{
+				TotalNumber: total,
 			})
 
 			if err != nil {
-				log.Println("error while ComputeAvarage Recv:", err)
+				log.Println("error while TotalNumber Recv:", err)
 				return err
 			}
 
@@ -77,44 +77,64 @@ func (s *server) ComputeAvarage(stream pb.CalculatorService_ComputeAvarageServer
 		}
 
 		if err != nil {
-			log.Println("error while ComputeAvarage Recv:", err)
+			log.Println("error while TotalNumber Recv:", err)
 			return err
 		}
 
-		sum += req.Number
-		count++
+		total += req.Number
 	}
-
-	return nil
 }
 
-func (s *server) FindMaximum(stream pb.CalculatorService_FindMaximumServer) error {
-
-	maximum := int32(0)
+func (s *server) FindMinimum(stream pb.CalculatorService_FindMinimumServer) error {
+	boolean := true
+	minimum := int32(0)
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
 			return nil
 		}
 
+		if boolean {
+			minimum = req.Number
+			boolean = false
+			err = stream.Send(&pb.FindMinimumResponse{Minimum: minimum})
+			if err != nil {
+				log.Println("error while FindMinimum Send:", err)
+				return err
+			}
+		}
+
 		if err != nil {
-			log.Println("error while FindMaximum Recv:", err)
+			log.Println("error while FindMinimum Recv:", err)
 			return err
 		}
 
 		fmt.Println(req)
 
-		if req.Number > maximum {
-			maximum = req.Number
-			err = stream.Send(&pb.FindMaximumResponse{Maximum: maximum})
+		if req.Number < minimum {
+			minimum = req.Number
+			err = stream.Send(&pb.FindMinimumResponse{Minimum: minimum})
 			if err != nil {
-				log.Println("error while FindMaximum Send:", err)
+				log.Println("error while FindMinimum Send:", err)
 				return err
 			}
 		}
 	}
+}
 
-	return nil
+func findPerfectNumber(n int64) bool {
+	var total int64
+	for i := int64(1); i < n; i++ {
+		if n%i == 0 {
+			total += i
+		}
+	}
+
+	if total == n {
+		return true
+	} else {
+		return false
+	}
 }
 
 func main() {

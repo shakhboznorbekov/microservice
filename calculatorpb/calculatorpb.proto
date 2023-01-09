@@ -6,42 +6,37 @@ option go_package = "calculatorpb/calculatorpb";
 
 service CalculatorService {
 
-    rpc Sum(SumRequest) returns (SumResponse) {}
-    rpc PrimeNumberDecompition(PrimeNumberDecompitionRequest) returns (stream PrimeNumberDecompitionResponse) {}
-    rpc ComputeAvarage(stream ComputeAvarageRequest) returns (ComputeAvarageResponse) {}
-    rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {}
+    rpc SquareRoot(SquareRequest) returns (SquareResponse) {}
+    rpc PerfectNumber(PerfectNumberRequest) returns (stream PerfectNumberResponse) {}
+    rpc TotalNumber(stream TotalNumberRequest) returns (TotalNumberResponse) {}
+    rpc FindMinimum(stream FindMinimumRequest) returns (stream FindMinimumResponse) {}
 
 }
 
-message SumRequest {
-    int32 first_number = 1;
-    int32 second_number = 2;
+message SquareRequest {
+    float number = 1;
+}
+message SquareResponse {
+    float sqrtResult = 1;
 }
 
-message SumResponse {
-    int32 sum_result = 1;
-}
-
-message PrimeNumberDecompitionRequest {
+message PerfectNumberRequest {
     int64 number = 1;
 }
-
-message PrimeNumberDecompitionResponse {
-    int64 prime_factor = 1;
+message PerfectNumberResponse {
+    int64 PerfectNumber = 1;
 }
 
-message ComputeAvarageRequest {
-    int64 number = 1;
+message TotalNumberRequest {
+    double number = 1;
+}
+message TotalNumberResponse {
+    double TotalNumber = 1;
 }
 
-message ComputeAvarageResponse {
-    double avarage = 1;
-}
-
-message FindMaximumRequest {
+message FindMinimumRequest {
     int32 number = 1;
 }
-
-message FindMaximumResponse {
-    int32 maximum = 1;
+message FindMinimumResponse {
+    int32 minimum = 1;
 }
